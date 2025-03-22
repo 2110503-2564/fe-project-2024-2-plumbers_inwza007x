@@ -16,7 +16,7 @@ export const authOptions: AuthOptions = {
 
                 if (credentials.email === "ILoveKaru3000ButAdmin@gmail.com" && credentials.password === "1212312121") {
                     return {
-                        id: "1",
+                        id: 1,
                         name: "Karu zaza123",
                         email: "ILoveKaru3000@gmail.com",
                         role: "admin",
@@ -27,7 +27,7 @@ export const authOptions: AuthOptions = {
 
                 if (credentials.email === "ILoveKaru3000@gmail.com" && credentials.password === "1212312121") {
                     return {
-                        id: "2",
+                        id: 2,
                         name: "Karu zaza123",
                         email: "ILoveKaru3000@gmail.com",
                         role: "user",
@@ -58,7 +58,7 @@ export const authOptions: AuthOptions = {
         async session({ session, token }) {
             if (token) {
                 session.user = {
-                    id: token.id as string,
+                    id: token.id as number,
                     name: token.name as string,
                     email: token.email as string,
                     role: token.role as string,
