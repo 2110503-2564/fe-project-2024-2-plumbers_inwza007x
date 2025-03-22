@@ -65,6 +65,7 @@ export const authOptions: AuthOptions = {
                     token: token.token as string,
                     phone: token.phone as string
                 };
+                
             }
             return session;
         }
