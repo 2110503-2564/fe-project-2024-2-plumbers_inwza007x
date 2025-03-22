@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import TopMenu from "@/components/TopMenu";
+import TopMenuServer from "@/components/TopMenuServer";
 import { Sarabun } from "next/font/google"; // Thai font import
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]/authOptions";
@@ -24,7 +24,7 @@ export default async function RootLayout({
       <body className={sarabun.className}>
         <ReduxProvider>
           <NextAuthProvider session={nextAuthSession}>
-            <TopMenu />
+            <TopMenuServer></TopMenuServer>
             {children}
           </NextAuthProvider>
         </ReduxProvider>
