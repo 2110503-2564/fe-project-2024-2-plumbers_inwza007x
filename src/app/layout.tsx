@@ -24,7 +24,7 @@ export default async function RootLayout({
       <body className={sarabun.className}>
         <ReduxProvider>
           <NextAuthProvider session={nextAuthSession}>
-            <TopMenuServer></TopMenuServer>
+            <TopMenuServer />
             {children}
           </NextAuthProvider>
         </ReduxProvider>

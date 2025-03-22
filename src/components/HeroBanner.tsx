@@ -31,7 +31,7 @@ export default function HeroBanner() {
                             Our expert team is dedicated to giving you the healthy, beautiful smile you deserve.
                         </p>
 
-                        <Link href="/register" className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300">
+                        <Link href="/booking" className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300">
                             Book Appointment
                         </Link>
                     </div>

@@ -3,7 +3,6 @@ import { ReactNode } from "react";
 interface InteractiveCardProps {
     children: ReactNode;
     DentistID: number;
-    onRemove?: () => void;
 }
 
 export default function InteractiveCard({ children, DentistID }: InteractiveCardProps) {

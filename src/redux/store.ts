@@ -1,5 +1,6 @@
 import {configureStore, combineReducers} from "@reduxjs/toolkit";
 import bookSlice from "./features/bookSlice";
+import userSlice from "./features/userSlice";
 import {persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER} from "redux-persist";
 import {useSelector, TypedUseSelectorHook} from "react-redux";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
@@ -26,12 +27,13 @@ function createPersistStorage(): WebStorage {
 const storage = createPersistStorage();
 
 const persistConfig = {
-    key: "bookingState",
+    key: "rootState",
     storage
 };
 
 const rootReducer = combineReducers({
-    bookSlice: bookSlice
+    book: bookSlice,
+    user: userSlice
 });
 
 export const store = configureStore({
