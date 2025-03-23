@@ -3,12 +3,12 @@ import { UserItem } from "@/libs/interfaces";
 import { RootState } from "@/redux/store"; 
 
 type UserState = {
-    user: UserItem | null;
+    userID: number | null;
     token: string;
 };
 
 const initialState: UserState = {
-    user: null,
+    userID: null,
     token: ""
 };
 
@@ -17,14 +17,18 @@ const userSlice = createSlice({
     initialState,
     reducers: {
         setUser: (state, action: PayloadAction<UserItem>) => {
-            state.user = action.payload;
+            state.userID = action.payload.userID;
+            state.token = action.payload.token;
         },
         clearUser: (state) => {
-            state.user = null;
+            state.userID = null;
+            state.token = "";
         },
     }
 });
 
 export const { setUser, clearUser } = userSlice.actions;
 export default userSlice.reducer;
-export const selectToken = (state: RootState) => state.user?.token;
+
+export const selectUserID = (state: RootState) => state.user.userID;
+export const selectToken = (state: RootState) => state.user.token;

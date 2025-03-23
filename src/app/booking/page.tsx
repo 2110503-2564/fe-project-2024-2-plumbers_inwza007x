@@ -1,19 +1,17 @@
 "use client";
 
-import { useDispatch, useSelector } from "react-redux";
-import { addBooking } from "@/redux/features/bookSlice";
-import { selectUserID } from "@/redux/features/bookSlice";
-import { selectToken } from "@/redux/features/userSlice";
+// import { useDispatch, useSelector } from "react-redux";
+// import { addBooking } from "@/redux/features/bookSlice";
+// import { selectUserID } from "@/redux/features/bookSlice";
+// import { selectToken } from "@/redux/features/userSlice";
 import { TextField, Select, MenuItem, Button, CircularProgress, Snackbar, Alert } from "@mui/material";
 import DateReserve from "@/components/DateReserve";
 import { useState } from "react";
 import createMeBooking from "@/libs/createMeBooking";
+import { useSession } from "next-auth/react";
 
 export default function DentistBookingPage() {
-    const dispatch = useDispatch();
-    const userID = useSelector(selectUserID);
-    const token = useSelector(selectToken);
-
+    const { data: session, status } = useSession();
     const [nameLastname, setNameLastname] = useState("");
     const [tel, setTel] = useState("");
     const [dentistID, setDentistID] = useState(0);
@@ -27,25 +25,26 @@ export default function DentistBookingPage() {
         e.preventDefault();
         setIsSubmitting(true);
 
-        const newBooking = { dentistID, bookDate, userID };
-        console.log("run")
+        if (!session?.user?.id || !session?.user?.token) {
+            setErrorOpen(true);
+            setIsSubmitting(false);
+            return;
+        }
 
+        const newBooking = { dentistID, bookDate, userID: session.user.id };
         try {
-            console.log("run2")
-            dispatch(addBooking(newBooking));
-            console.log("run3", token)
-            await createMeBooking(newBooking,token);
-            console.log("run4")
-
+            await createMeBooking(newBooking, session.user.token);
+            console.log(newBooking);
             setNameLastname("");
             setTel("");
             setDentistID(0);
             setBookDate(new Date());
-
             setSuccessOpen(true);
-        } catch (error) {
+        } 
+        catch (error) {
             setErrorOpen(true);
-        } finally {
+        } 
+        finally {
             setIsSubmitting(false);
         }
     };
@@ -71,8 +70,8 @@ export default function DentistBookingPage() {
                             <MenuItem value="" disabled>Select a Dentist</MenuItem>
                             <MenuItem value="1">Dr. Karu Sudsuay</MenuItem>
                             <MenuItem value="2">Dr. Poru Yraii</MenuItem>
-                            <MenuItem value="3">Dr. opal zaza</MenuItem>
-                            <MenuItem value="4">Dr. Fluke ka5567</MenuItem>
+                            <MenuItem value="3">Dr. Opal Zaza</MenuItem>
+                            <MenuItem value="4">Dr. Fluke Ka5567</MenuItem>
                             <MenuItem value="5">Dr. Kkang 456</MenuItem>
                         </Select>
                     </div>

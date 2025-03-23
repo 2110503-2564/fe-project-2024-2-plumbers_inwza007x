@@ -1,4 +1,4 @@
-export default async function createMeBooking(formData: { userID: number,dentistID: number, bookDate: Date}, token: string) {
+export default async function createMeBooking(formData: { userID: number, dentistID: number, bookDate: Date}, token: string) {
     try {
         const response = await fetch("http://localhost:5000/api/v1/bookings/me", {
             method: "POST",
@@ -6,7 +6,10 @@ export default async function createMeBooking(formData: { userID: number,dentist
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json" 
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify({
+                dentistID: formData.dentistID,
+                date: formData.bookDate instanceof Date ? formData.bookDate.toISOString() : formData.bookDate,
+            })            
         });
 
         const data = await response.json();
@@ -18,7 +21,7 @@ export default async function createMeBooking(formData: { userID: number,dentist
         return data;
     } 
     catch (error: any) {
-        console.error("create booking error:", error.message || error);
+        console.error("Create booking error:", error.message || error);
         return null;
     }
 }
