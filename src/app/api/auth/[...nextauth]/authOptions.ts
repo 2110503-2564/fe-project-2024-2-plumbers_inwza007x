@@ -1,6 +1,9 @@
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import userLogIn from "@/libs/userLogIn";
+
+import userLogin from "@/libs/userLogIn";
+import getUserProfile from "@/libs/getUserProfile";
+
 
 export const authOptions: AuthOptions = {
     providers: [
@@ -12,20 +15,20 @@ export const authOptions: AuthOptions = {
             },
             async authorize(credentials, req) {
                 if (!credentials) return null;
-                const user = await userLogIn(credentials.email, credentials.password);
 
-                if (user) {
-                    return {
-                        id: user.user.id,
-                        name: user.user.name,
-                        email: user.user.email,
-                        role: user.user.role,
-                        token: user.token,
-                        phone: user.user.phone
-                    };
-                } else {
-                    return null;
+                const user = await userLogin(credentials.email, credentials.password);
+                
+                if (user && user.token) {
+                    const userProfile = await getUserProfile(user.token);
+
+                    if (userProfile && userProfile.success) {
+                        const { userID, name, email, phone, role } = userProfile.data;
+
+                        return { id: userID, name, email, phone, role, token: user.token };
+                    }
                 }
+
+                return null;
             }
         })
     ],
@@ -36,11 +39,9 @@ export const authOptions: AuthOptions = {
                 token.id = user.id;
                 token.name = user.name;
                 token.email = user.email;
+                token.phone = user.phone;
                 token.role = user.role;
                 token.token = user.token;
-                if (user.phone) {
-                    token.phone = user.phone;
-                }
             }
             return token;
         },
@@ -50,9 +51,9 @@ export const authOptions: AuthOptions = {
                     id: token.id as number,
                     name: token.name as string,
                     email: token.email as string,
+                    phone: token.phone as string,
                     role: token.role as string,
-                    token: token.token as string,
-                    phone: token.phone as string
+                    token: token.token as string
                 };
             }
             return session;
