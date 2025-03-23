@@ -17,11 +17,11 @@ export interface DentistResponse {
 }
 
 export interface BookingItem {
-    dentistID: string;
+    dentistID: number;
     bookDate: Date;
-    userID?: string | null;
+    userID?: number | null;
 }
 
 export interface UserItem {
-    userID: string | null;
+    userID: number | null;
 }

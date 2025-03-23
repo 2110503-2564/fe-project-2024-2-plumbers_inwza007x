@@ -7,7 +7,6 @@ export default async function userLogIn(userEmail: string, userPassword: string)
         });
 
         const data = await response.json();
-        //console.log("Login Response Data:", data);
 
         if (!response.ok) {
             throw new Error(data.message || "Failed to log in");

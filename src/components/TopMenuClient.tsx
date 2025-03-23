@@ -1,18 +1,19 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { useSession } from 'next-auth/react';
 
 export default function TopMenuClient({ session }: { session: any }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-   
+
     return (
         <div className="bg-white text-black shadow-md relative z-50">
             <div className="flex justify-between items-center px-8 py-4">
                 <div className="flex items-center space-x-8">
-                    <h1 className="text-2xl font-bold text-blue-500">DentalCare</h1>
+                    <Link href="/admin/bookings">
+                        <h1 className="text-2xl font-bold text-blue-500 cursor-pointer">DentalCare</h1>
+                    </Link>
                     <div className="hidden md:flex items-center space-x-8">
                         <Link href="/" className="hover:text-blue-500">Home</Link>
                         <Link href="/dentists" className="hover:text-blue-500">Find Dentists</Link>
@@ -23,7 +24,7 @@ export default function TopMenuClient({ session }: { session: any }) {
                 <div className="hidden md:flex items-center space-x-4">
                     {session ? (
                         <Link href="/api/auth/signout?callbackUrl=/" className="hover:text-red-500">
-                            Sign Out ({session.user?.name})
+                            Sign Out ({session.user.name})
                         </Link>
                     ) : ( 
                         <Link href="/api/auth/signin?callbackUrl=/" className="hover:text-blue-500">
