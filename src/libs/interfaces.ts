@@ -24,4 +24,5 @@ export interface BookingItem {
 
 export interface UserItem {
     userID: number | null;
+    token: string;
 }

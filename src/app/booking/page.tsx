@@ -3,38 +3,51 @@
 import { useDispatch, useSelector } from "react-redux";
 import { addBooking } from "@/redux/features/bookSlice";
 import { selectUserID } from "@/redux/features/bookSlice";
+import { selectToken } from "@/redux/features/userSlice";
 import { TextField, Select, MenuItem, Button, CircularProgress, Snackbar, Alert } from "@mui/material";
 import DateReserve from "@/components/DateReserve";
 import { useState } from "react";
+import createMeBooking from "@/libs/createMeBooking";
 
 export default function DentistBookingPage() {
     const dispatch = useDispatch();
     const userID = useSelector(selectUserID);
+    const token = useSelector(selectToken);
 
     const [nameLastname, setNameLastname] = useState("");
     const [tel, setTel] = useState("");
-    const [dentistID, setDentistID] = useState("");
+    const [dentistID, setDentistID] = useState(0);
     const [bookDate, setBookDate] = useState(new Date());
 
     const [successOpen, setSuccessOpen] = useState(false);
+    const [errorOpen, setErrorOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        setTimeout(() => {
-            const newBooking = { dentistID, bookDate, userID };
+        const newBooking = { dentistID, bookDate, userID };
+        console.log("run")
+
+        try {
+            console.log("run2")
             dispatch(addBooking(newBooking));
+            console.log("run3", token)
+            await createMeBooking(newBooking,token);
+            console.log("run4")
 
             setNameLastname("");
             setTel("");
-            setDentistID("");
+            setDentistID(0);
             setBookDate(new Date());
 
             setSuccessOpen(true);
+        } catch (error) {
+            setErrorOpen(true);
+        } finally {
             setIsSubmitting(false);
-        }, 800);
+        }
     };
 
     const handleCloseSuccess = () => setSuccessOpen(false);
@@ -54,7 +67,7 @@ export default function DentistBookingPage() {
                     </div>
 
                     <div className="w-full">
-                        <Select variant="standard" required value={dentistID} onChange={(e) => setDentistID(e.target.value)} displayEmpty>
+                        <Select variant="standard" required value={dentistID} onChange={(e) => setDentistID(Number(e.target.value))} displayEmpty>
                             <MenuItem value="" disabled>Select a Dentist</MenuItem>
                             <MenuItem value="1">Dr. Karu Sudsuay</MenuItem>
                             <MenuItem value="2">Dr. Poru Yraii</MenuItem>
