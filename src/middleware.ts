@@ -16,22 +16,6 @@ export async function middleware(req: any) {
             return NextResponse.redirect(new URL("/unauthorized", req.url));
         }
     }
-
-    // สำหรับหน้า /booking สามารถเข้าถึงได้ทั้ง user และ admin
-    if (req.nextUrl.pathname === "/booking") {
-        // ไม่มีการจำกัด role สำหรับหน้า /booking
-        return NextResponse.next();
-    }
-    if (req.nextUrl.pathname === "/dentists") {
-        // ไม่มีการจำกัด role สำหรับหน้า /booking
-        return NextResponse.next();
-    }
-
-    // สำหรับหน้าที่เหลือ หากไม่ใช่ admin ให้ redirect ไปหน้า unauthorized
-    if (token.role !== "admin") {
-        return NextResponse.redirect(new URL("/unauthorized", req.url));
-    }
-
     // หากเป็น admin ให้เข้าได้
     return NextResponse.next();
 }
