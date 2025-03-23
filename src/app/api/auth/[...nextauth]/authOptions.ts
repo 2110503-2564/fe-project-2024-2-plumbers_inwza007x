@@ -1,5 +1,6 @@
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import userLogIn from "@/libs/userLogIn";
 
 export const authOptions: AuthOptions = {
     providers: [
@@ -10,33 +11,21 @@ export const authOptions: AuthOptions = {
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials, req) {
-                if (!credentials) {
+                if (!credentials) return null;
+                const user = await userLogIn(credentials.email, credentials.password);
+
+                if (user) {
+                    return {
+                        id: user.user.id,
+                        name: user.user.name,
+                        email: user.user.email,
+                        role: user.user.role,
+                        token: user.token,
+                        phone: user.user.phone
+                    };
+                } else {
                     return null;
                 }
-
-                if (credentials.email === "ILoveKaru3000ButAdmin@gmail.com" && credentials.password === "1212312121") {
-                    return {
-                        id: 1,
-                        name: "Karu zaza123",
-                        email: "ILoveKaru3000@gmail.com",
-                        role: "admin",
-                        token: "someGeneratedToken",
-                        phone: "123-456-7890"
-                    };
-                }
-
-                if (credentials.email === "ILoveKaru3000@gmail.com" && credentials.password === "1212312121") {
-                    return {
-                        id: 2,
-                        name: "Karu zaza123",
-                        email: "ILoveKaru3000@gmail.com",
-                        role: "user",
-                        token: "someGeneratedToken",
-                        phone: "123-456-7890"
-                    };
-                }
-
-                return null;
             }
         })
     ],
@@ -65,7 +54,6 @@ export const authOptions: AuthOptions = {
                     token: token.token as string,
                     phone: token.phone as string
                 };
-                
             }
             return session;
         }

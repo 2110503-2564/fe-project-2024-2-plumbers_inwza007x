@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useSession } from 'next-auth/react';
 
 export default function TopMenuClient({ session }: { session: any }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
+   
     return (
         <div className="bg-white text-black shadow-md relative z-50">
             <div className="flex justify-between items-center px-8 py-4">
@@ -51,7 +52,7 @@ export default function TopMenuClient({ session }: { session: any }) {
 
                         {session ? (
                             <Link href="/api/auth/signout" className="text-red-600 text-sm">
-                                Sign Out ({session.user?.name})
+                                Sign Out ({session.user.name})
                             </Link>
                         ) : (
                             <Link href="/api/auth/signin" className="text-cyan-600 text-sm">
