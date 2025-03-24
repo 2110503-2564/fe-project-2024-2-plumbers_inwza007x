@@ -1,4 +1,4 @@
-export default async function updateMeBooking(formData: { dentistID: number, bookDate: Date }, token: string) {
+export default async function updateMeBooking(formData: { dentistID: number, date: Date }, token: string) {
     try {
         const response = await fetch("http://localhost:5000/api/v1/bookings/me", {
             method: "PUT",
@@ -8,7 +8,7 @@ export default async function updateMeBooking(formData: { dentistID: number, boo
             },
             body: JSON.stringify({
                 dentistID: formData.dentistID,
-                date: formData.bookDate instanceof Date ? formData.bookDate.toISOString() : formData.bookDate,
+                date: formData.date instanceof Date ? formData.date.toISOString() : formData.date,
             })            
         });
 
@@ -21,7 +21,7 @@ export default async function updateMeBooking(formData: { dentistID: number, boo
         return data;
     } 
     catch (error: any) {
-        console.error("update booking error:", error.message || error);
+        console.error("Update booking error:", error.message || error);
         return null;
     }
 }

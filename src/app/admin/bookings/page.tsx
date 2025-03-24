@@ -20,11 +20,11 @@ import {
 
 // Mock data for bookings with userID included
 const mockBookings: BookingItem[] = [
-    { dentistID: 1, bookDate: new Date("2025-03-01"), userID: 1 },
-    { dentistID: 2, bookDate: new Date("2025-03-05"), userID: 2 },
-    { dentistID: 3, bookDate: new Date("2025-03-10"), userID: 3 },
-    { dentistID: 4, bookDate: new Date("2025-03-12"), userID: 4 },
-    { dentistID: 5, bookDate: new Date("2025-03-15"), userID: 5 },
+    { bookingID: 1, dentistID: 1, date: new Date("2025-03-01"), userID: 1 },
+    { bookingID: 2, dentistID: 2, date: new Date("2025-03-05"), userID: 2 },
+    { bookingID: 3, dentistID: 3, date: new Date("2025-03-10"), userID: 3 },
+    { bookingID: 4, dentistID: 4, date: new Date("2025-03-12"), userID: 4 },
+    { bookingID: 5, dentistID: 5, date: new Date("2025-03-15"), userID: 5 },
 ];
 
 export default function BookingList() {
@@ -36,7 +36,7 @@ export default function BookingList() {
 
     const handleEdit = (bookingItem: BookingItem) => {
         setEditableBooking(bookingItem);
-        setEditedDate(bookingItem.bookDate.toISOString().split("T")[0]);
+        setEditedDate(bookingItem.date.toISOString().split("T")[0]);
         setEditedUserID(String(bookingItem.userID));
         setEditedDentistID(String(bookingItem.dentistID));
     };
@@ -47,7 +47,7 @@ export default function BookingList() {
                 ...editableBooking,
                 userID: parseInt(editedUserID),
                 dentistID: parseInt(editedDentistID),
-                bookDate: new Date(editedDate),
+                date: new Date(editedDate),
             };
             setBookItems((prevItems) =>
                 prevItems.map((item) =>
@@ -95,7 +95,7 @@ export default function BookingList() {
                             </TableHead>
                             <TableBody>
                                 {bookItems.map((bookingItem) => (
-                                    <TableRow key={`${bookingItem.dentistID}-${bookingItem.bookDate}`} sx={{ '&:hover': { backgroundColor: '#f8fafc' }, transition: 'background-color 0.2s' }}>
+                                    <TableRow key={`${bookingItem.dentistID}-${bookingItem.date}`} sx={{ '&:hover': { backgroundColor: '#f8fafc' }, transition: 'background-color 0.2s' }}>
                                         <TableCell>
                                             {editableBooking === bookingItem ? (
                                                 <TextField label="User ID" value={editedUserID} onChange={(e) => setEditedUserID(e.target.value)} fullWidth variant="outlined" size="small" />
@@ -114,7 +114,7 @@ export default function BookingList() {
                                             {editableBooking === bookingItem ? (
                                                 <TextField label="Date" type="date" value={editedDate} onChange={(e) => setEditedDate(e.target.value)} fullWidth variant="outlined" size="small" />
                                             ) : (
-                                                <Typography variant="body2" sx={{ color: '#334155' }}>{bookingItem.bookDate.toLocaleDateString('en-US')}</Typography>
+                                                <Typography variant="body2" sx={{ color: '#334155' }}>{bookingItem.date.toLocaleDateString('en-US')}</Typography>
                                             )}
                                         </TableCell>
                                         <TableCell>

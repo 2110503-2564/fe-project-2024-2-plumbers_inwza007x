@@ -1,38 +1,89 @@
 "use client";
 
-import { Card, CardContent, Typography, Button, CardActions } from "@mui/material";
-import { BookingItem, BookingJson } from "@/libs/interfaces";
+import { Card, CardContent, Typography, Button, CardActions, Select, MenuItem, CircularProgress } from "@mui/material";
+import { BookingItem, DentistJson, DentistItem } from "@/libs/interfaces";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import getMeBooking from "@/libs/getMeBooking";
+import updateMeBooking from "@/libs/updateMeBooking";
+import deleteMeBooking from "@/libs/deleteMeBooking";
+import getDentists from "@/libs/getDentists";
+import DateReserve from "@/components/DateReserve";
 
 export default function BookingList() {
     const { data: session, status } = useSession();
     const [booking, setBooking] = useState<BookingItem | null>(null);
     const [loading, setLoading] = useState(true);
+    const [newDentistID, setNewDentistID] = useState<number>(0);
+    const [newDate, setNewDate] = useState<Date>(new Date());
+    const [dentists, setDentists] = useState<DentistItem[]>([]);
 
-    // Fetch the user's booking on load
     useEffect(() => {
         if (session) {
             getMeBooking(session.user.token)
                 .then((data) => {
                     const transformedBooking: BookingItem = {
-                        bookingID: data.data.bookingid, 
+                        bookingID: data.data.bookingid,
                         userID: data.data.userid,
                         dentistID: data.data.dentistid,
-                        date: new Date(data.data.date)
+                        date: new Date(data.data.date),
                     };
 
                     setBooking(transformedBooking);
+                    setNewDentistID(transformedBooking.dentistID);
+                    setNewDate(transformedBooking.date);
                 })
                 .catch(() => setBooking(null))
                 .finally(() => setLoading(false));
 
-            console.log("nig", booking);
+            getDentists(session.user.token)
+                .then((data) => setDentists(data.data))
+                .catch(() => setDentists([]));
         }
     }, [session]);
 
+    const handleUpdate = async () => {
+        if (!session || !booking) return;
 
+        try {
+            const formData = { dentistID: newDentistID, date: newDate };
+
+            const response = await updateMeBooking(formData, session.user.token);
+
+            if (response) {
+                setBooking({ ...booking, dentistID: newDentistID, date: formData.date });
+                alert("Appointment updated successfully!");
+            } else {
+                alert("Failed to update appointment");
+            }
+        } catch (error) {
+            console.error("Error updating booking:", error);
+            alert("An error occurred while updating your appointment");
+        }
+    };
+
+    const handleCancel = async () => {
+        if (!session || !booking) return;
+
+        if (window.confirm("Are you sure you want to cancel this appointment?")) {
+            try {
+                await deleteMeBooking(session.user.token);
+                setBooking(null);
+                alert("Appointment cancelled successfully!");
+            } catch (error) {
+                console.error("Error cancelling booking:", error);
+                alert("An error occurred while cancelling your appointment");
+            }
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-gray-100">
+                <CircularProgress />
+            </div>
+        );
+    }
 
     return (
         <div className="flex justify-center items-center h-screen bg-gray-100">
@@ -44,10 +95,7 @@ export default function BookingList() {
                 <Card
                     key={`${booking.dentistID}-${booking.date}`}
                     className="shadow-lg rounded-lg p-6 bg-white w-[450px] mb-4"
-                    sx={{
-                        boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)",
-                        borderRadius: "16px",
-                    }}
+                    sx={{ boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)", borderRadius: "16px" }}
                 >
                     <CardContent>
                         <Typography variant="h5" component="div" className="font-semibold mb-4">
@@ -56,22 +104,45 @@ export default function BookingList() {
                         <Typography variant="body1" className="mb-2 text-gray-600">
                             <strong>Dentist ID:</strong> {booking.dentistID}
                         </Typography>
-                        <Typography variant="body1" className="mb-4 text-gray-600">
+                        <Typography variant="body1" className="mb-2 text-gray-600">
                             <strong>Date:</strong> {new Date(booking.date).toLocaleDateString()}
                         </Typography>
+
+                        <div className="mt-4">
+                            <Select
+                                fullWidth
+                                variant="outlined"
+                                label="Select Dentist"
+                                value={newDentistID}
+                                onChange={(e) => setNewDentistID(Number(e.target.value))}
+                            >
+                                {dentists.map((dentist) => (
+                                    <MenuItem key={dentist.dentistID} value={dentist.dentistID}>
+                                        {dentist.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </div>
+                        <div className="mt-4">
+                            <DateReserve value={newDate} onChange={setNewDate} />
+                        </div>
                     </CardContent>
-                    <CardActions className="justify-center">
+                    <CardActions className="flex justify-between">
+                        <Button
+                            size="large"
+                            color="primary"
+                            onClick={handleUpdate}
+                            variant="contained"
+                            sx={{ borderRadius: "20px", padding: "10px 20px", fontWeight: "bold", textTransform: "none" }}
+                        >
+                            Reschedule
+                        </Button>
                         <Button
                             size="large"
                             color="error"
-                            // onClick={handleCancel}
+                            onClick={handleCancel}
                             variant="contained"
-                            sx={{
-                                borderRadius: "20px",
-                                padding: "10px 20px",
-                                fontWeight: "bold",
-                                textTransform: "none",
-                            }}
+                            sx={{ borderRadius: "20px", padding: "10px 20px", fontWeight: "bold", textTransform: "none" }}
                         >
                             Cancel Appointment
                         </Button>
