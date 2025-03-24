@@ -1,9 +1,10 @@
 "use client";
 
-import { Card, CardContent, Typography, Button, CardActions, Select, MenuItem, CircularProgress } from "@mui/material";
+import { Card, CardContent, Typography, Button, CardActions, Select, MenuItem, CircularProgress, FormControl, InputLabel } from "@mui/material";
 import { BookingItem, DentistJson, DentistItem } from "@/libs/interfaces";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import getMeBooking from "@/libs/getMeBooking";
 import updateMeBooking from "@/libs/updateMeBooking";
 import deleteMeBooking from "@/libs/deleteMeBooking";
@@ -37,10 +38,25 @@ export default function BookingList() {
                 .finally(() => setLoading(false));
 
             getDentists(session.user.token)
-                .then((data) => setDentists(data.data))
+                .then((data) => setDentists(
+                    data.data.map((dentist: any) => ({
+                        dentistID: dentist.dentistid,
+                        name: dentist.name,
+                        experience: dentist.experience,
+                        expertise: dentist.expertise
+                    }))
+                ))
                 .catch(() => setDentists([]));
+
+            console.log(dentists);
         }
     }, [session]);
+
+    // Function to get dentist name by ID
+    const getDentistNameById = (id: number): string => {
+        const dentist = dentists.find(d => d.dentistID === id);
+        return dentist ? dentist.name : `Dentist #${id}`;
+    };
 
     const handleUpdate = async () => {
         if (!session || !booking) return;
@@ -89,7 +105,9 @@ export default function BookingList() {
         <div className="flex justify-center items-center h-screen bg-gray-100">
             {!booking ? (
                 <div className="bg-slate-200 rounded-lg shadow-md px-6 py-4 text-center">
-                    <div className="text-md text-gray-600 font-medium">No Dentist Appointment</div>
+                    <Link href="/booking" passHref>
+                        <div className="text-md text-gray-600 font-medium">No Dentist Appointment - Book One Now!</div>
+                    </Link>
                 </div>
             ) : (
                 <Card
@@ -102,26 +120,30 @@ export default function BookingList() {
                             Dentist Appointment
                         </Typography>
                         <Typography variant="body1" className="mb-2 text-gray-600">
-                            <strong>Dentist ID:</strong> {booking.dentistID}
+                            <strong>Dentist:</strong> {getDentistNameById(booking.dentistID)}
                         </Typography>
                         <Typography variant="body1" className="mb-2 text-gray-600">
                             <strong>Date:</strong> {new Date(booking.date).toLocaleDateString()}
                         </Typography>
 
                         <div className="mt-4">
-                            <Select
-                                fullWidth
-                                variant="outlined"
-                                label="Select Dentist"
-                                value={newDentistID}
-                                onChange={(e) => setNewDentistID(Number(e.target.value))}
-                            >
-                                {dentists.map((dentist) => (
-                                    <MenuItem key={dentist.dentistID} value={dentist.dentistID}>
-                                        {dentist.name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
+                            <FormControl fullWidth variant="outlined">
+                                <InputLabel id="dentist-select-label">Select Dentist</InputLabel>
+                                <Select
+                                    labelId="dentist-select-label"
+                                    id="dentist-select"
+                                    value={newDentistID}
+                                    onChange={(e) => setNewDentistID(Number(e.target.value))}
+                                    label="Select Dentist"
+                                    renderValue={(selected) => getDentistNameById(selected as number)}
+                                >
+                                    {dentists.map((dentist) => (
+                                        <MenuItem key={dentist.dentistID} value={dentist.dentistID}>
+                                            {dentist.name} - {dentist.expertise} ({dentist.experience} years)
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         </div>
                         <div className="mt-4">
                             <DateReserve value={newDate} onChange={setNewDate} />
