@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom'
-import getDentist from '@/libs/getDentist'
+import getDentist from '@/libs/getDentists'
 
 describe('Get Dentist by ID', () => {
   	var DentistByIdPromise:Promise<Object>
