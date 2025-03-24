@@ -1,9 +1,10 @@
-export default async function deleteBooking( bookingID: string) {
+export default async function deleteBooking(bookingID: Number, token: string) {
     try {
-        const response = await fetch(`http://localhost:5000/api/v1/booking/${bookingID}`, {
-            method: "DEL",
-            headers: { "Content-Type": "application/json" },
-            
+        const response = await fetch(`http://localhost:5000/api/v1/bookings/${bookingID}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
         });
 
         const data = await response.json();

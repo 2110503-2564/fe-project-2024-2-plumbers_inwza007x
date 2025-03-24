@@ -13,12 +13,31 @@ export default function DentistList() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (session) {
-            getDentists(session.user.token)
-                .then((data) => setDentists(data)) // dentistid -> dentistID
-                .catch(() => setDentists(null))
-                .finally(() => setLoading(false));
-        }
+        const fetchDentists = async () => {
+            if (session) {
+                try {
+                    const data = await getDentists(session.user.token);
+                    const transformedDentists = {
+                        success: data.success,
+                        data: data.data.map((dentist: any) => ({
+                            dentistID: dentist.dentistid,
+                            name: dentist.name,
+                            expertise: dentist.expertise,
+                            experience: dentist.experience
+                        })),
+                    };
+                    setDentists(transformedDentists);
+                } 
+                catch (error) {
+                    setDentists(null);
+                } 
+                finally {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchDentists();
     }, [session]);
 
     if (!session) {

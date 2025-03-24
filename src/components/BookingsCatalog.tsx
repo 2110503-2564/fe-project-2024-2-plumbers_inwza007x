@@ -1,29 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { BookingItem, BookingsJson } from "@/libs/interfaces";
-import { 
-    Button, 
-    TextField, 
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableContainer, 
-    TableHead, 
-    TableRow,
-    Paper,
-    Typography,
-    Box,
-    Chip
-} from "@mui/material";
-import DateReserve from "@/components/DateReserve"; // Importing DateReserve component
+import updateBooking from "@/libs/updateBooking";
+import deleteBooking from "@/libs/deleteBooking";
+import { Button, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Chip } from "@mui/material";
+import DateReserve from "@/components/DateReserve"; 
 
 interface BookingsCatalogProps {
     BookingsJson: BookingsJson;
 }
 
 export default function BookingsCatalog({ BookingsJson }: BookingsCatalogProps) {
+    const { data: session, status } = useSession();
     const [bookings, setBookings] = useState<BookingItem[]>([]);
     const [editableBooking, setEditableBooking] = useState<BookingItem | null>(null);
     const [date, setDate] = useState<Date>(new Date()); 
@@ -49,34 +40,57 @@ export default function BookingsCatalog({ BookingsJson }: BookingsCatalogProps) 
         setDentistID(booking.dentistID);
     };
 
-    const handleSave = () => {
-        if (editableBooking && userID !== null && dentistID !== null && date !== null) {
-            const updatedBooking = {
-                ...editableBooking,
-                userID: userID,
-                dentistID: dentistID,
-                date: date,
-            };
-            setBookings((prevBookings) =>
-                prevBookings.map((booking) =>
-                    booking.bookingID === updatedBooking.bookingID ? updatedBooking : booking
-                )
-            );
-            setEditableBooking(null);
+    const handleSave = async () => {
+        if (!session || !editableBooking || userID === null || dentistID === null || !date) {
+            return;
         }
-    };
+    
+        const formData = { userID, dentistID, date, bookingID: editableBooking.bookingID };
+    
+        try {
+            const response = await updateBooking(formData, session.user.token);
+            if (response) {
+                setBookings((prevBookings) =>
+                    prevBookings.map((booking) =>
+                        booking.bookingID === editableBooking.bookingID
+                            ? { ...booking, ...formData }
+                            : booking
+                    )
+                );
+                setEditableBooking(null);
+            } 
+            else {
+                console.error("Failed to update booking");
+            }
+        } 
+        catch (error) {
+            console.error("Error updating booking:", error);
+        }
+    };    
 
     const handleCancel = () => {
         setEditableBooking(null);
     };
 
-    const handleDelete = (booking: BookingItem) => {
-        setBookings((prevBookings) =>
-            prevBookings.filter((item) => item.bookingID !== booking.bookingID)
-        );
+    const handleDelete = async (booking: BookingItem) => {
+        if (!session) {
+            return;
+        }
+
+        try {
+            const response = await deleteBooking(booking.bookingID, session.user.token);
+            if (response.success) {
+                setBookings((prevBookings) =>
+                    prevBookings.filter((item) => item.bookingID !== booking.bookingID)
+                );
+            } else {
+                console.error("Failed to delete booking");
+            }
+        } catch (error) {
+            console.error("Error deleting booking:", error);
+        }
     };
 
-    // Modal component for editing booking details
     const EditingModal = () => {
         if (!editableBooking) return null;
         
@@ -87,22 +101,12 @@ export default function BookingsCatalog({ BookingsJson }: BookingsCatalogProps) 
                     
                     <Box className="mb-4">
                         <Typography variant="subtitle2" className="mb-1">User ID</Typography>
-                        <TextField
-                            fullWidth
-                            type="number"
-                            value={userID || ''}
-                            onChange={(e) => setUserID(Number(e.target.value))}
-                        />
+                        <TextField fullWidth type="number" value={userID || ''} onChange={(e) => setUserID(Number(e.target.value))} />
                     </Box>
                     
                     <Box className="mb-4">
                         <Typography variant="subtitle2" className="mb-1">Dentist ID</Typography>
-                        <TextField
-                            fullWidth
-                            type="number"
-                            value={dentistID || ''}
-                            onChange={(e) => setDentistID(Number(e.target.value))}
-                        />
+                        <TextField fullWidth type="number" value={dentistID || ''} onChange={(e) => setDentistID(Number(e.target.value))} />
                     </Box>
                     
                     <Box className="mb-6">

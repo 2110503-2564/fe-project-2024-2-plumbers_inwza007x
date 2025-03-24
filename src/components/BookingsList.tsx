@@ -13,18 +13,27 @@ export default function BookingsList() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (session) {
-            getBookings(session.user.token)
-                .then((data) => {
+        const fetchBookings = async () => {
+            if (session) {
+                try {
+                    const data = await getBookings(session.user.token);
+                    
                     setBookings(data);
-                })
-                .catch(() => setBookings(null))
-                .finally(() => setLoading(false));
-        }
+                } 
+                catch (error) {
+                    setBookings(null);
+                } 
+                finally {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchBookings();
     }, [session]);
 
     if (!session) {
-        return <h1>Error naka 😢</h1>
+        return <h1>Error naka 😢</h1>;
     }
 
     if (loading) {
@@ -33,10 +42,10 @@ export default function BookingsList() {
 
     return (
         <div className="flex justify-center items-center h-screen bg-gray-100">
-            { bookings ? (
-                <BookingsCatalog BookingsJson={bookings}/>
+            {bookings ? (
+                <BookingsCatalog BookingsJson={bookings} />
             ) : (
-                <h2> No Booking available. Karu is still the cutest though 🥰.</h2>
+                <h2>No Booking available. Karu is still the cutest though 🥰.</h2>
             )}
         </div>
     );

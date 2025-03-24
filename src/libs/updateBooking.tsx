@@ -1,8 +1,11 @@
-export default async function updateBooking( bookingID: string, formData: { userID: Number, dentistID: Number, date: Date}) {
+export default async function updateBooking(formData: { userID: Number, dentistID: Number, date: Date, bookingID: Number }, token: string) {
     try {
-        const response = await fetch(`http://localhost:5000/api/v1/booking/${bookingID}`, {
+        const response = await fetch(`http://localhost:5000/api/v1/bookings/${formData.bookingID}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json" 
+            },
             body: JSON.stringify(formData)
         });
 

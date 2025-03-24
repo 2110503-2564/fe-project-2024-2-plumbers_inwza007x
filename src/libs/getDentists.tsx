@@ -1,4 +1,4 @@
-export default async function getDentists( token: string ) {
+export default async function getDentists(token: string) {
     try {
         const response = await fetch("http://localhost:5000/api/v1/dentists", {
             method: "GET",

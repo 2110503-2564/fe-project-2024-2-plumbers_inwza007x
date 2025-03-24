@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import userRegister from "@/libs/userRegister";
 import { TextField, Button, CircularProgress, Snackbar, Alert, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 
@@ -15,6 +15,8 @@ export default function RegisterPage() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [successOpen, setSuccessOpen] = useState(false);
+    const [errorOpen, setErrorOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
         const { name, value } = e.target as { name?: string; value: string };
@@ -26,26 +28,40 @@ export default function RegisterPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+    
+        const { name, email, phone, password } = formData;
+        if (!name || !email || !phone || !password) {
+            setErrorMessage("All fields are required.");
+            setErrorOpen(true);
+            setIsSubmitting(false);
+            return;
+        }
+    
         try {
-            const data = await userRegister(formData);
-
-            if (!data) {
-                throw new Error("Failed to register");
+            const response = await userRegister(formData);
+    
+            if (response.success) {
+                console.log("User registered successfully:", response);
+                setSuccessOpen(true);
+                setFormData({ name: "", email: "", phone: "", password: "", role: "user" });
+            } 
+            else {
+                setErrorMessage(response.error || "An error occurred during registration.");
+                setErrorOpen(true);
             }
-
-            console.log("User registered successfully:", data);
-            setSuccessOpen(true);
-            setFormData({ name: "", email: "", phone: "", password: "", role: "user" });
         } 
         catch (error: any) {
             console.error("Registration error:", error.message || error);
+            setErrorMessage("Maybe this email is already in use.");
+            setErrorOpen(true);
         } 
         finally {
             setIsSubmitting(false);
         }
-    };
+    };    
 
     const handleCloseSuccess = () => setSuccessOpen(false);
+    const handleCloseError = () => setErrorOpen(false);
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -75,6 +91,12 @@ export default function RegisterPage() {
             <Snackbar open={successOpen} autoHideDuration={5000} onClose={handleCloseSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
                 <Alert onClose={handleCloseSuccess} severity="success" variant="filled">
                     Registration successful!
+                </Alert>
+            </Snackbar>
+
+            <Snackbar open={errorOpen} autoHideDuration={5000} onClose={handleCloseError} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleCloseError} severity="error" variant="filled">
+                    {errorMessage}
                 </Alert>
             </Snackbar>
         </div>

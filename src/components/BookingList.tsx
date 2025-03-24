@@ -20,46 +20,59 @@ export default function BookingList() {
     const [dentists, setDentists] = useState<DentistItem[]>([]);
 
     useEffect(() => {
-        if (session) {
-            getMeBooking(session.user.token)
-                .then((data) => {
-                    const transformedBooking: BookingItem = {
-                        bookingID: data.data.bookingid,
-                        userID: data.data.userid,
-                        dentistID: data.data.dentistid,
-                        date: new Date(data.data.date),
-                    };
+        const fetchData = async () => {
+            if (!session) {
+                return;
+            }
 
-                    setBooking(transformedBooking);
-                    setNewDentistID(transformedBooking.dentistID);
-                    setNewDate(transformedBooking.date);
-                })
-                .catch(() => setBooking(null))
-                .finally(() => setLoading(false));
+            try {
+                const bookingData = await getMeBooking(session.user.token);
+                const transformedBooking: BookingItem = {
+                    bookingID: bookingData.data.bookingid,
+                    userID: bookingData.data.userid,
+                    dentistID: bookingData.data.dentistid,
+                    date: new Date(bookingData.data.date),
+                };
+                setBooking(transformedBooking);
+                setNewDentistID(transformedBooking.dentistID);
+                setNewDate(transformedBooking.date);
+            } 
+            catch (error) {
+                console.error("Error fetching booking:", error);
+                setBooking(null);
+            }
 
-            getDentists(session.user.token)
-                .then((data) => setDentists(
-                    data.data.map((dentist: any) => ({
+            try {
+                const dentistsData = await getDentists(session.user.token);
+                setDentists(
+                    dentistsData.data.map((dentist: any) => ({
                         dentistID: dentist.dentistid,
                         name: dentist.name,
                         experience: dentist.experience,
                         expertise: dentist.expertise
                     }))
-                ))
-                .catch(() => setDentists([]));
+                );
+            } 
+            catch (error) {
+                console.error("Error fetching dentists:", error);
+                setDentists([]);
+            }
 
-            console.log(dentists);
-        }
+            setLoading(false);
+        };
+
+        fetchData();
     }, [session]);
 
-    // Function to get dentist name by ID
     const getDentistNameById = (id: number): string => {
         const dentist = dentists.find(d => d.dentistID === id);
         return dentist ? dentist.name : `Dentist #${id}`;
     };
 
     const handleUpdate = async () => {
-        if (!session || !booking) return;
+        if (!session || !booking) {
+            return;
+        }
 
         try {
             const formData = { dentistID: newDentistID, date: newDate };
@@ -69,10 +82,12 @@ export default function BookingList() {
             if (response) {
                 setBooking({ ...booking, dentistID: newDentistID, date: formData.date });
                 alert("Appointment updated successfully!");
-            } else {
+            } 
+            else {
                 alert("Failed to update appointment");
             }
-        } catch (error) {
+        } 
+        catch (error) {
             console.error("Error updating booking:", error);
             alert("An error occurred while updating your appointment");
         }
@@ -84,9 +99,11 @@ export default function BookingList() {
         if (window.confirm("Are you sure you want to cancel this appointment?")) {
             try {
                 await deleteMeBooking(session.user.token);
+
                 setBooking(null);
                 alert("Appointment cancelled successfully!");
-            } catch (error) {
+            } 
+            catch (error) {
                 console.error("Error cancelling booking:", error);
                 alert("An error occurred while cancelling your appointment");
             }
@@ -110,11 +127,7 @@ export default function BookingList() {
                     </Link>
                 </div>
             ) : (
-                <Card
-                    key={`${booking.dentistID}-${booking.date}`}
-                    className="shadow-lg rounded-lg p-6 bg-white w-[450px] mb-4"
-                    sx={{ boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)", borderRadius: "16px" }}
-                >
+                <Card key={`${booking.dentistID}-${booking.date}`} className="shadow-lg rounded-lg p-6 bg-white w-[450px] mb-4" sx={{ boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)", borderRadius: "16px" }}>
                     <CardContent>
                         <Typography variant="h5" component="div" className="font-semibold mb-4">
                             Dentist Appointment
@@ -129,14 +142,7 @@ export default function BookingList() {
                         <div className="mt-4">
                             <FormControl fullWidth variant="outlined">
                                 <InputLabel id="dentist-select-label">Select Dentist</InputLabel>
-                                <Select
-                                    labelId="dentist-select-label"
-                                    id="dentist-select"
-                                    value={newDentistID}
-                                    onChange={(e) => setNewDentistID(Number(e.target.value))}
-                                    label="Select Dentist"
-                                    renderValue={(selected) => getDentistNameById(selected as number)}
-                                >
+                                <Select labelId="dentist-select-label" id="dentist-select" value={newDentistID} onChange={(e) => setNewDentistID(Number(e.target.value))} label="Select Dentist" renderValue={(selected) => getDentistNameById(selected as number)}>
                                     {dentists.map((dentist) => (
                                         <MenuItem key={dentist.dentistID} value={dentist.dentistID}>
                                             {dentist.name} - {dentist.expertise} ({dentist.experience} years)
@@ -150,24 +156,8 @@ export default function BookingList() {
                         </div>
                     </CardContent>
                     <CardActions className="flex justify-between">
-                        <Button
-                            size="large"
-                            color="primary"
-                            onClick={handleUpdate}
-                            variant="contained"
-                            sx={{ borderRadius: "20px", padding: "10px 20px", fontWeight: "bold", textTransform: "none" }}
-                        >
-                            Reschedule
-                        </Button>
-                        <Button
-                            size="large"
-                            color="error"
-                            onClick={handleCancel}
-                            variant="contained"
-                            sx={{ borderRadius: "20px", padding: "10px 20px", fontWeight: "bold", textTransform: "none" }}
-                        >
-                            Cancel Appointment
-                        </Button>
+                        <Button onClick={handleUpdate} variant="contained" color="primary">Reschedule</Button>
+                        <Button onClick={handleCancel} variant="contained" color="error">Cancel Appointment</Button>
                     </CardActions>
                 </Card>
             )}

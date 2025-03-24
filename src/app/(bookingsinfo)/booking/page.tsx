@@ -5,6 +5,7 @@ import { DentistItem } from "@/libs/interfaces";
 import DateReserve from "@/components/DateReserve";
 import { useState, useEffect } from "react";
 import createMeBooking from "@/libs/createMeBooking";
+import getMeBooking from "@/libs/getMeBooking";
 import { useSession } from "next-auth/react";
 import getDentists from "@/libs/getDentists";
 
@@ -17,26 +18,50 @@ export default function DentistBookingPage() {
     
     const [successOpen, setSuccessOpen] = useState(false);
     const [errorOpen, setErrorOpen] = useState(false);
+    const [bookingErrorOpen, setBookingErrorOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        if (session?.user?.token) {
-            getDentists(session.user.token)
-                .then((data) => setDentists(data.data.map((dentist: any) => ({
-                    dentistID: dentist.dentistid,
-                    name: dentist.name,
-                    expertise: dentist.expertise,
-                    experience: dentist.experience
-                }))))
-                .catch(() => setDentists([]))
-                .finally(() => setLoading(false));
-        } else {
-            setLoading(false);
-        }
+        const fetchData = async () => {
+            if (session?.user?.token) {
+                try {
+                    const dentistsData = await getDentists(session.user.token);
+                    setDentists(dentistsData.data.map((dentist: any) => ({
+                        dentistID: dentist.dentistid,
+                        name: dentist.name,
+                        expertise: dentist.expertise,
+                        experience: dentist.experience
+                    })));
+                } 
+                catch (error) {
+                    setDentists([]);
+                } 
+                finally {
+                    setLoading(false);
+                }
+
+                try {
+                    const booking = await getMeBooking(session.user.token);
+                    if (booking) {
+                        setBookingErrorOpen(true);
+                    }
+                } 
+                catch (error) {
+                    setBookingErrorOpen(false);
+                }
+            } 
+            else {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
     }, [session]);
 
     const getDentistNameById = (id: number): string => {
-        if (id === 0) return "Select a Dentist";
+        if (id === 0) {
+            return "Select a Dentist";
+        }
         const dentist = dentists.find(d => d.dentistID === id);
         return dentist ? dentist.name : `Dentist #${id}`;
     };
@@ -51,9 +76,13 @@ export default function DentistBookingPage() {
             return;
         }
 
-        // Validate dentist selection
         if (dentistID === 0) {
             setErrorOpen(true);
+            setIsSubmitting(false);
+            return;
+        }
+
+        if (bookingErrorOpen) {
             setIsSubmitting(false);
             return;
         }
@@ -61,12 +90,15 @@ export default function DentistBookingPage() {
         const newBooking = { dentistID, date };
         try {
             await createMeBooking(newBooking, session.user.token);
+            
             setDentistID(0);
             setDate(new Date());
             setSuccessOpen(true);
-        } catch (error) {
+        } 
+        catch (error) {
             setErrorOpen(true);
-        } finally {
+        } 
+        finally {
             setIsSubmitting(false);
         }
     };
@@ -82,15 +114,7 @@ export default function DentistBookingPage() {
                     <div className="w-full">
                         <FormControl fullWidth variant="outlined">
                             <InputLabel id="dentist-select-label">Select a Dentist</InputLabel>
-                            <Select
-                                labelId="dentist-select-label" 
-                                id="dentist-select"
-                                value={dentistID}
-                                onChange={(e) => setDentistID(Number(e.target.value))}
-                                label="Select a Dentist"
-                                renderValue={(selected) => getDentistNameById(selected as number)}
-                                required
-                            >
+                            <Select labelId="dentist-select-label" id="dentist-select" value={dentistID} onChange={(e) => setDentistID(Number(e.target.value))} label="Select a Dentist" renderValue={(selected) => getDentistNameById(selected as number)} required>
                                 <MenuItem value={0} disabled>Select a Dentist</MenuItem>
                                 {loading ? (
                                     <MenuItem disabled>Loading dentists...</MenuItem>
@@ -110,13 +134,7 @@ export default function DentistBookingPage() {
                     </div>
 
                     <div className="flex justify-center mt-8">
-                        <Button 
-                            type="submit" 
-                            variant="contained" 
-                            color="primary" 
-                            size="large" 
-                            disabled={isSubmitting || dentistID === 0}
-                        >
+                        <Button type="submit" variant="contained" color="primary" size="large" disabled={isSubmitting || dentistID === 0 || bookingErrorOpen}>
                             {isSubmitting ? (
                                 <>
                                     <CircularProgress size={24} color="inherit" sx={{ mr: 1 }} />
@@ -139,6 +157,12 @@ export default function DentistBookingPage() {
             <Snackbar open={errorOpen} autoHideDuration={5000} onClose={() => setErrorOpen(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
                 <Alert onClose={() => setErrorOpen(false)} severity="error" variant="filled">
                     There was an error booking your appointment.
+                </Alert>
+            </Snackbar>
+
+            <Snackbar open={bookingErrorOpen} autoHideDuration={20000} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert severity="warning" variant="filled">
+                    You already have a booking and cannot make another one at this time.
                 </Alert>
             </Snackbar>
         </div>

@@ -1,5 +1,3 @@
-"use client";
-
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
@@ -13,10 +11,7 @@ interface DateReserveProps {
 export default function DateReserve({ value, onChange }: DateReserveProps) {
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-                value={dayjs(value)}
-                onChange={(newValue) => onChange(newValue ? newValue.toDate() : new Date())}
-            />
+            <DatePicker value={dayjs(value)} onChange={(newValue) => onChange(newValue ? newValue.toDate() : new Date())} />
         </LocalizationProvider>
     );
 }
