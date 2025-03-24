@@ -1,10 +1,7 @@
-export default async function getBookings(token: string, dentistID?: string, lastID: number = 0, limit: number = 25) {
+export default async function getBookings(token: string, lastID: number = 0, limit: number = 25) {
     try {
         const url = new URL("http://localhost:5000/api/v1/bookings");
 
-        if (dentistID) {
-            url.pathname += `/${dentistID}`;
-        }
         url.searchParams.append("lastID", lastID.toString());
         url.searchParams.append("limit", limit.toString());
 

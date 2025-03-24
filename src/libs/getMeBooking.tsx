@@ -16,7 +16,7 @@ export default async function getMeBooking(token: string) {
         return data;
     } 
     catch (error: any) {
-        console.error("get booking error:", error.message || error);
+        console.error("Get booking error:", error.message || error);
         return null;
     }
 }
