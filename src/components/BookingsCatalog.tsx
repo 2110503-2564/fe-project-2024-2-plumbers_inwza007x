@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BookingItem, BookingsJson } from "@/libs/interfaces";
 import { 
@@ -17,36 +17,49 @@ import {
     Box,
     Chip
 } from "@mui/material";
+import DateReserve from "@/components/DateReserve"; // Importing DateReserve component
 
 interface BookingsCatalogProps {
     BookingsJson: BookingsJson;
 }
 
 export default function BookingsCatalog({ BookingsJson }: BookingsCatalogProps) {
-    const [bookItems, setBookItems] = useState<BookingItem[]>(BookingsJson.data);
+    const [bookings, setBookings] = useState<BookingItem[]>([]);
     const [editableBooking, setEditableBooking] = useState<BookingItem | null>(null);
-    const [editedDate, setEditedDate] = useState<string>(""); 
-    const [editedUserID, setEditedUserID] = useState<string>(""); 
-    const [editedDentistID, setEditedDentistID] = useState<string>(""); 
+    const [date, setDate] = useState<Date>(new Date()); 
+    const [userID, setUserID] = useState<number | null>(null); 
+    const [dentistID, setDentistID] = useState<number | null>(null);
 
-    const handleEdit = (bookingItem: BookingItem) => {
-        setEditableBooking(bookingItem);
-        setEditedDate(new Date(bookingItem.date).toISOString().split("T")[0]);
-        setEditedUserID(String(bookingItem.userID));
-        setEditedDentistID(String(bookingItem.dentistID));
+    useEffect(() => {
+        if (BookingsJson && Array.isArray(BookingsJson.data)) {
+            const transformedBookings: BookingItem[] = BookingsJson.data.map((item: any) => ({
+                bookingID: item.bookingid,
+                userID: Number(item.userid),
+                dentistID: Number(item.dentistid),
+                date: new Date(item.date),
+            }));
+            setBookings(transformedBookings);
+        }
+    }, [BookingsJson]);
+    
+    const handleEdit = (booking: BookingItem) => {
+        setEditableBooking(booking);
+        setDate(new Date(booking.date));
+        setUserID(booking.userID);
+        setDentistID(booking.dentistID);
     };
 
     const handleSave = () => {
-        if (editableBooking) {
+        if (editableBooking && userID !== null && dentistID !== null && date !== null) {
             const updatedBooking = {
                 ...editableBooking,
-                userID: parseInt(editedUserID),
-                dentistID: parseInt(editedDentistID),
-                bookDate: new Date(editedDate),
+                userID: userID,
+                dentistID: dentistID,
+                date: date,
             };
-            setBookItems((prevItems) =>
-                prevItems.map((item) =>
-                    item.dentistID === updatedBooking.dentistID ? updatedBooking : item
+            setBookings((prevBookings) =>
+                prevBookings.map((booking) =>
+                    booking.bookingID === updatedBooking.bookingID ? updatedBooking : booking
                 )
             );
             setEditableBooking(null);
@@ -57,81 +70,119 @@ export default function BookingsCatalog({ BookingsJson }: BookingsCatalogProps) 
         setEditableBooking(null);
     };
 
-    const handleDelete = (bookingItem: BookingItem) => {
-        setBookItems((prevItems) =>
-            prevItems.filter((item) => item.dentistID !== bookingItem.dentistID)
+    const handleDelete = (booking: BookingItem) => {
+        setBookings((prevBookings) =>
+            prevBookings.filter((item) => item.bookingID !== booking.bookingID)
+        );
+    };
+
+    // Modal component for editing booking details
+    const EditingModal = () => {
+        if (!editableBooking) return null;
+        
+        return (
+            <Box className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <Box className="bg-white p-6 rounded-lg w-full max-w-md">
+                    <Typography variant="h6" className="mb-4">Edit Appointment</Typography>
+                    
+                    <Box className="mb-4">
+                        <Typography variant="subtitle2" className="mb-1">User ID</Typography>
+                        <TextField
+                            fullWidth
+                            type="number"
+                            value={userID || ''}
+                            onChange={(e) => setUserID(Number(e.target.value))}
+                        />
+                    </Box>
+                    
+                    <Box className="mb-4">
+                        <Typography variant="subtitle2" className="mb-1">Dentist ID</Typography>
+                        <TextField
+                            fullWidth
+                            type="number"
+                            value={dentistID || ''}
+                            onChange={(e) => setDentistID(Number(e.target.value))}
+                        />
+                    </Box>
+                    
+                    <Box className="mb-6">
+                        <Typography variant="subtitle2" className="mb-1">Date</Typography>
+                        <div className="w-full">
+                            <DateReserve value={date} onChange={setDate} />
+                        </div>
+                    </Box>
+                    
+                    <Box className="flex justify-end gap-2">
+                        <Button variant="outlined" onClick={handleCancel}>
+                            Cancel
+                        </Button>
+                        <Button variant="contained" onClick={handleSave}>
+                            Save Changes
+                        </Button>
+                    </Box>
+                </Box>
+            </Box>
         );
     };
 
     return (
-        <div className="flex flex-col items-center min-h-screen bg-slate-50 p-4">
-            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', marginBottom: '40px' }}>
-                <Link href="/admin/bookings"><Typography variant="h4" sx={{ fontWeight: 'bold', color: '#3b82f6', cursor: 'pointer', '&:hover': { color: '#2563eb' } }}>Booking System</Typography></Link>
-                <Typography variant="h5" sx={{ fontWeight: 'medium', color: '#475569' }}>Appointment Management</Typography>
-            </Box>
-
-            <Paper elevation={3} sx={{ width: '90%', maxWidth: '900px', padding: '24px', borderRadius: '12px', backgroundColor: 'white' }}>
-                <Typography variant="h5" sx={{ textAlign: 'center', marginBottom: '24px', fontWeight: 'bold', color: '#1e293b' }}>Appointments List</Typography>
-
-                {bookItems.length === 0 ? (
-                    <Box sx={{ padding: '40px', textAlign: 'center', backgroundColor: '#f1f5f9', borderRadius: '8px' }}>
-                        <Typography variant="body1" sx={{ color: '#64748b', fontWeight: 'medium' }}>No appointments scheduled</Typography>
+        <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4 md:p-6">
+            <Box className="w-full bg-white shadow-lg rounded-xl p-4 md:p-6 mb-8">
+                <Typography variant="h4" className="text-blue-600 font-bold text-center mb-4">
+                    Appointment Management
+                </Typography>
+                {bookings.length === 0 ? (
+                    <Box className="p-6 bg-gray-200 rounded-lg text-center">
+                        <Typography variant="body1" className="text-gray-600 font-medium">
+                            No appointments scheduled
+                        </Typography>
                     </Box>
                 ) : (
-                    <TableContainer sx={{ borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                        <Table sx={{ minWidth: 650 }}>
-                            <TableHead sx={{ backgroundColor: '#f1f5f9' }}>
-                                <TableRow>
-                                    <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>User ID</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Dentist ID</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Appointment Date</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Actions</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {bookItems.map((bookingItem) => (
-                                    <TableRow key={`${bookingItem.bookingID}`} sx={{ '&:hover': { backgroundColor: '#f8fafc' }, transition: 'background-color 0.2s' }}>
-                                        <TableCell>
-                                            {editableBooking === bookingItem ? (
-                                                <TextField label="User ID" value={editedUserID} onChange={(e) => setEditedUserID(e.target.value)} fullWidth variant="outlined" size="small" />
-                                            ) : (
-                                                <Chip label={`User #${bookingItem.userID}`} color="primary" variant="outlined" size="small" />
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {editableBooking === bookingItem ? (
-                                                <TextField label="Dentist ID" value={editedDentistID} onChange={(e) => setEditedDentistID(e.target.value)} fullWidth variant="outlined" size="small" />
-                                            ) : (
-                                                <Chip label={`Dr. #${bookingItem.dentistID}`} color="success" variant="outlined" size="small" />
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {editableBooking === bookingItem ? (
-                                                <TextField label="Date" type="date" value={editedDate} onChange={(e) => setEditedDate(e.target.value)} fullWidth variant="outlined" size="small" />
-                                            ) : (
-                                                <Typography variant="body2" sx={{ color: '#334155' }}>{new Date(bookingItem.date).toLocaleDateString('en-US')}</Typography>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {editableBooking === bookingItem ? (
-                                                <Box sx={{ display: 'flex', gap: 1 }}>
-                                                    <Button color="success" onClick={handleSave} variant="contained" size="small">Save</Button>
-                                                    <Button color="inherit" onClick={handleCancel} variant="outlined" size="small">Cancel</Button>
-                                                </Box>
-                                            ) : (
-                                                <Box sx={{ display: 'flex', gap: 1 }}>
-                                                    <Button color="primary" onClick={() => handleEdit(bookingItem)} variant="outlined" size="small">Edit</Button>
-                                                    <Button color="error" onClick={() => handleDelete(bookingItem)} variant="outlined" size="small">Cancel</Button>
-                                                </Box>
-                                            )}
-                                        </TableCell>
+                    <div className="overflow-x-auto">
+                        <TableContainer component={Paper} className="shadow-lg rounded-lg overflow-hidden">
+                            <Table className="min-w-full">
+                                <TableHead className="bg-gray-200">
+                                    <TableRow>
+                                        <TableCell className="font-bold text-gray-700">User ID</TableCell>
+                                        <TableCell className="font-bold text-gray-700">Dentist ID</TableCell>
+                                        <TableCell className="font-bold text-gray-700">Date</TableCell>
+                                        <TableCell className="font-bold text-gray-700">Actions</TableCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                                </TableHead>
+                                <TableBody>
+                                    {bookings.map((booking) => (
+                                        <TableRow key={booking.bookingID} className="hover:bg-gray-100 transition-all">
+                                            <TableCell>
+                                                <Chip label={`User #${booking.userID}`} color="primary" variant="outlined" />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Chip label={`Dr. #${booking.dentistID}`} color="success" variant="outlined" />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="body2" className="text-gray-700">
+                                                    {booking.date.toLocaleDateString("en-US")}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box className="flex flex-wrap gap-2">
+                                                    <Button color="primary" onClick={() => handleEdit(booking)} variant="outlined" size="small">
+                                                        Edit
+                                                    </Button>
+                                                    <Button color="error" onClick={() => handleDelete(booking)} variant="outlined" size="small">
+                                                        Cancel
+                                                    </Button>
+                                                </Box>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </div>
                 )}
-            </Paper>
+            </Box>
+            
+            {editableBooking && <EditingModal />}
         </div>
     );
 }
