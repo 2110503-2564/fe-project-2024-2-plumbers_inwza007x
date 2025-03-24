@@ -1,4 +1,4 @@
-export default async function createMeBooking(formData: { userID: number, dentistID: number, bookDate: Date}, token: string) {
+export default async function createMeBooking(formData: { dentistID: number, bookDate: Date }, token: string) {
     try {
         const response = await fetch("http://localhost:5000/api/v1/bookings/me", {
             method: "POST",

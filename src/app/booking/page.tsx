@@ -13,7 +13,6 @@ import { useSession } from "next-auth/react";
 export default function DentistBookingPage() {
     const { data: session, status } = useSession();
     const [nameLastname, setNameLastname] = useState("");
-    const [tel, setTel] = useState("");
     const [dentistID, setDentistID] = useState(0);
     const [bookDate, setBookDate] = useState(new Date());
 
@@ -25,18 +24,17 @@ export default function DentistBookingPage() {
         e.preventDefault();
         setIsSubmitting(true);
 
-        if (!session?.user?.id || !session?.user?.token) {
+        if (!session?.user?.token) {
             setErrorOpen(true);
             setIsSubmitting(false);
             return;
         }
 
-        const newBooking = { dentistID, bookDate, userID: session.user.id };
+        const newBooking = { dentistID, bookDate };
         try {
             await createMeBooking(newBooking, session.user.token);
-            console.log(newBooking);
+
             setNameLastname("");
-            setTel("");
             setDentistID(0);
             setBookDate(new Date());
             setSuccessOpen(true);
@@ -59,10 +57,6 @@ export default function DentistBookingPage() {
                 <form className="space-y-6" onSubmit={handleSubmit}>
                     <div className="w-full">
                         <TextField fullWidth variant="standard" label="Name-Lastname" required value={nameLastname} onChange={(e) => setNameLastname(e.target.value)} />
-                    </div>
-
-                    <div className="w-full">
-                        <TextField fullWidth variant="standard" label="Contact Number" required value={tel} onChange={(e) => setTel(e.target.value)} />
                     </div>
 
                     <div className="w-full">
