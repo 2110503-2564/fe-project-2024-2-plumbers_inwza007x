@@ -15,7 +15,7 @@ export default function DentistList() {
     useEffect(() => {
         if (session) {
             getDentists(session.user.token)
-                .then((data) => setDentists(data))
+                .then((data) => setDentists(data)) // dentistid -> dentistID
                 .catch(() => setDentists(null))
                 .finally(() => setLoading(false));
         }

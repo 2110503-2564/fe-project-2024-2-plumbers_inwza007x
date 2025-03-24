@@ -1,4 +1,4 @@
-export default async function createMeBooking(formData: { dentistID: number, bookDate: Date }, token: string) {
+export default async function createMeBooking(formData: { dentistID: number, date: Date }, token: string) {
     try {
         const response = await fetch("http://localhost:5000/api/v1/bookings/me", {
             method: "POST",
@@ -8,7 +8,7 @@ export default async function createMeBooking(formData: { dentistID: number, boo
             },
             body: JSON.stringify({
                 dentistID: formData.dentistID,
-                date: formData.bookDate instanceof Date ? formData.bookDate.toISOString() : formData.bookDate,
+                date: formData.date instanceof Date ? formData.date.toISOString() : formData.date,
             })            
         });
 

@@ -10,8 +10,8 @@ export default function DentistCatalog({ DentistJson }: DentistCatalogProps) {
         <div className="flex flex-wrap justify-center gap-6">
             {DentistJson.data.map((dentist) => (
                 <Card 
-                    key={dentist.DentistID}
-                    DentistID={dentist.DentistID} 
+                    key={dentist.dentistID}
+                    dentistID={dentist.dentistID} 
                     name={dentist.name} 
                     experience={dentist.experience} 
                     expertise={dentist.expertise} 

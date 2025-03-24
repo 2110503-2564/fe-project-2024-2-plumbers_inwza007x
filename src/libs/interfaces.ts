@@ -1,5 +1,5 @@
 export interface DentistItem {
-    DentistID: number;
+    dentistID: number;
     name: string;
     experience: number;
     expertise: string;
@@ -7,7 +7,7 @@ export interface DentistItem {
 
 export interface DentistJson {
     success: boolean;
-    pagination: object;
+    pagination?: object;
     data: DentistItem[];
 }
 
@@ -17,9 +17,16 @@ export interface DentistResponse {
 }
 
 export interface BookingItem {
+    bookingID: number;
+    userID: number;
     dentistID: number;
-    bookDate: Date;
-    userID?: number | null;
+    date: Date;
+}
+
+export interface BookingJson {
+    success: boolean;
+    pagination?: object;
+    data: BookingItem;
 }
 
 export interface UserItem {

@@ -14,7 +14,7 @@ export default function DentistBookingPage() {
     const { data: session, status } = useSession();
     const [nameLastname, setNameLastname] = useState("");
     const [dentistID, setDentistID] = useState(0);
-    const [bookDate, setBookDate] = useState(new Date());
+    const [date, setDate] = useState(new Date());
 
     const [successOpen, setSuccessOpen] = useState(false);
     const [errorOpen, setErrorOpen] = useState(false);
@@ -30,13 +30,13 @@ export default function DentistBookingPage() {
             return;
         }
 
-        const newBooking = { dentistID, bookDate };
+        const newBooking = { dentistID, date };
         try {
             await createMeBooking(newBooking, session.user.token);
 
             setNameLastname("");
             setDentistID(0);
-            setBookDate(new Date());
+            setDate(new Date());
             setSuccessOpen(true);
         } 
         catch (error) {
@@ -71,7 +71,7 @@ export default function DentistBookingPage() {
                     </div>
 
                     <div className="w-full">
-                        <DateReserve value={bookDate} onChange={setBookDate} />
+                        <DateReserve value={date} onChange={setDate} />
                     </div>
 
                     <div className="flex justify-center mt-8">
