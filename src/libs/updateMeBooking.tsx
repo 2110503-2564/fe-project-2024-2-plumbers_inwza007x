@@ -1,21 +1,27 @@
-export default async function createMeBooking(formData: { userID: Number, dentistID: Number, date: Date}) {
+export default async function updateMeBooking(formData: { dentistID: number, bookDate: Date }, token: string) {
     try {
-        const response = await fetch("http://localhost:5000/api/v1/booking/me", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData)
+        const response = await fetch("http://localhost:5000/api/v1/bookings/me", {
+            method: "PUT",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json" 
+            },
+            body: JSON.stringify({
+                dentistID: formData.dentistID,
+                date: formData.bookDate instanceof Date ? formData.bookDate.toISOString() : formData.bookDate,
+            })            
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || "Failed to create booking");
+            throw new Error(data.message || "Failed to update booking");
         }
 
         return data;
     } 
     catch (error: any) {
-        console.error("create booking error:", error.message || error);
+        console.error("update booking error:", error.message || error);
         return null;
     }
 }
