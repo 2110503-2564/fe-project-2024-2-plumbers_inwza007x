@@ -27,6 +27,8 @@ export default function BookingList() {
                 })
                 .catch(() => setBooking(null))
                 .finally(() => setLoading(false));
+
+            console.log("nig", booking);
         }
     }, [session]);
 

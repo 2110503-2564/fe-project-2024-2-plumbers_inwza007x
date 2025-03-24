@@ -25,8 +25,13 @@ export interface BookingItem {
 
 export interface BookingJson {
     success: boolean;
-    pagination?: object;
     data: BookingItem;
+}
+
+export interface BookingsJson {
+    success: boolean;
+    pagination: object;
+    data: BookingItem[];
 }
 
 export interface UserItem {
