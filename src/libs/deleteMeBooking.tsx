@@ -16,7 +16,7 @@ export default async function deleteMeBooking(token: string) {
         return data;
     } 
     catch (error: any) {
-        console.error("delete booking error:", error.message || error);
+        console.error("Delete booking error:", error.message || error);
         return null;
     }
 }

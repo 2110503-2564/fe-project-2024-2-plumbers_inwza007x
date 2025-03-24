@@ -1,4 +1,4 @@
-export default async function updateBooking( bookingID: string,formData: { userID: Number, dentistID: Number, date: Date}) {
+export default async function updateBooking( bookingID: string, formData: { userID: Number, dentistID: Number, date: Date}) {
     try {
         const response = await fetch(`http://localhost:5000/api/v1/booking/${bookingID}`, {
             method: "PUT",
