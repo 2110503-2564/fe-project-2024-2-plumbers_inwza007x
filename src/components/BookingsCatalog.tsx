@@ -90,7 +90,7 @@ export default function BookingsCatalog({ BookingsJson }: BookingsCatalogProps) 
                             </TableHead>
                             <TableBody>
                                 {bookItems.map((bookingItem) => (
-                                    <TableRow key={`${bookingItem.dentistID}-${bookingItem.date}`} sx={{ '&:hover': { backgroundColor: '#f8fafc' }, transition: 'background-color 0.2s' }}>
+                                    <TableRow key={`${bookingItem.bookingID}`} sx={{ '&:hover': { backgroundColor: '#f8fafc' }, transition: 'background-color 0.2s' }}>
                                         <TableCell>
                                             {editableBooking === bookingItem ? (
                                                 <TextField label="User ID" value={editedUserID} onChange={(e) => setEditedUserID(e.target.value)} fullWidth variant="outlined" size="small" />
