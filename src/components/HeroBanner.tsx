@@ -50,21 +50,21 @@ export default function HeroBanner() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 text-center">
                     <div className="bg-white p-6 rounded-lg shadow-sm">
                         <h2 className="text-3xl font-bold text-gray-800">
-                            69<span className="text-blue-500">+</span>
+                            42,000<span className="text-blue-500">+</span>
                         </h2>
                         <p className="text-gray-500 text-sm uppercase tracking-wide">HAPPY PATIENTS</p>
                     </div>
 
                     <div className="bg-white p-6 rounded-lg shadow-sm">
                         <h2 className="text-3xl font-bold text-gray-800">
-                            3<span className="text-blue-500">+</span>
+                            69<span className="text-blue-500">+</span>
                         </h2>
                         <p className="text-gray-500 text-sm uppercase tracking-wide">CERTIFIED DENTISTS</p>
                     </div>
 
                     <div className="bg-white p-6 rounded-lg shadow-sm">
                         <h2 className="text-3xl font-bold text-gray-800">
-                            0<span className="text-blue-500">+</span>
+                            2,200<span className="text-blue-500">+</span>
                         </h2>
                         <p className="text-gray-500 text-sm uppercase tracking-wide">YEARS OF EXCELLENCE</p>
                     </div>
