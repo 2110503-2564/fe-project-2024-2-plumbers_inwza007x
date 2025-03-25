@@ -1,6 +1,8 @@
+import BACKEND_URL from "./geturl";
+
 export default async function userRegister(formData: { name: string; email: string; phone: string; password: string; role: string }) {
     try {
-        const response = await fetch("http://localhost:5000/api/v1/auth/register", {
+        const response = await fetch(`${BACKEND_URL}/api/v1/auth/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formData)

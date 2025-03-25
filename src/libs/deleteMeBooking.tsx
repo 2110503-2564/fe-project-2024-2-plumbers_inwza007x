@@ -1,6 +1,8 @@
+import BACKEND_URL from "./geturl";
+
 export default async function deleteMeBooking(token: string) {
     try {
-        const response = await fetch("http://localhost:5000/api/v1/bookings/me", {
+        const response = await fetch(`${BACKEND_URL}/api/v1/bookings/me`, {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${token}`

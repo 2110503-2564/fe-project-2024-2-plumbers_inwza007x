@@ -1,6 +1,8 @@
+import BACKEND_URL from "./geturl";
+
 export default async function getBookings(token: string, lastID: number = 0, limit: number = 25) {
     try {
-        const url = new URL("http://localhost:5000/api/v1/bookings");
+        const url = new URL(`${BACKEND_URL}/api/v1/bookings`);
 
         url.searchParams.append("lastID", lastID.toString());
         url.searchParams.append("limit", limit.toString());

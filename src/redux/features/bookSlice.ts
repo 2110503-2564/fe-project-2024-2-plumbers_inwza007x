@@ -13,12 +13,12 @@ export const bookSlice = createSlice({
     initialState,
     reducers: {
         addBooking: (state, action: PayloadAction<BookingItem>) => {
-            const { dentistID, bookDate, userID } = action.payload;
-            const bookDateObj = bookDate instanceof Date ? bookDate : new Date(bookDate);
+            const { dentistID, date, userID } = action.payload;
+            const bookDateObj = date instanceof Date ? date : new Date(date);
             
             const existingBookingIndex = state.bookItems.findIndex((item) => {
-                    const itemDateObj = item.bookDate instanceof Date ? 
-                        item.bookDate : new Date(item.bookDate);
+                    const itemDateObj = item.date instanceof Date ? 
+                        item.date : new Date(item.date);
                     
                     return item.dentistID === dentistID && itemDateObj.getTime() === bookDateObj.getTime();
                 }
@@ -32,17 +32,17 @@ export const bookSlice = createSlice({
             } else {
                 state.bookItems.push({ 
                     ...action.payload, 
-                    bookDate: bookDateObj,
+                    date: bookDateObj,
                     userID 
                 });
             }
         },
         removeBooking: (state, action: PayloadAction<BookingItem>) => {
-            const { dentistID, bookDate } = action.payload;
-            const bookDateObj = bookDate instanceof Date ? bookDate : new Date(bookDate);
+            const { dentistID, date } = action.payload;
+            const bookDateObj = date instanceof Date ? date : new Date(date);
             
             state.bookItems = state.bookItems.filter(item => {
-                const itemDateObj = item.bookDate instanceof Date ? item.bookDate : new Date(item.bookDate);
+                const itemDateObj = item.date instanceof Date ? item.date : new Date(item.date);
                 
                 return item.dentistID !== dentistID || itemDateObj.getTime() !== bookDateObj.getTime();
             });

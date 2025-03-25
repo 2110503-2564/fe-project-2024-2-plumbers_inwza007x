@@ -1,6 +1,8 @@
+import BACKEND_URL from "./geturl";
+
 export default async function getUserProfile(token: string) {
     try {
-        const response = await fetch("http://localhost:5000/api/v1/auth/me", {
+        const response = await fetch(`${BACKEND_URL}/api/v1/auth/me`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`

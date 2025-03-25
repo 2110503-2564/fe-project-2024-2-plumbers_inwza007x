@@ -1,6 +1,8 @@
+import BACKEND_URL from "./geturl";
+
 export default async function updateBooking(formData: { userID: Number, dentistID: Number, date: Date, bookingID: Number }, token: string) {
     try {
-        const response = await fetch(`http://localhost:5000/api/v1/bookings/${formData.bookingID}`, {
+        const response = await fetch(`${BACKEND_URL}/api/v1/bookings/${formData.bookingID}`, {
             method: "PUT",
             headers: {
                 "Authorization": `Bearer ${token}`,
